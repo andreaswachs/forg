@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 print(f"The default locale for this program is: {forgdata['default-locale']}.")
             except:
                 print("There was no default locale set. You can set it with the flag --set-default-locale <locale-code>")
-                
+
             forgdata.close()
             exit(0)
 
@@ -151,6 +151,5 @@ if __name__ == '__main__':
         # Organize!
         forg_obj.organize()
     else:
-        print(dir(parser))
         print(parser.usage)
         exit(1)
