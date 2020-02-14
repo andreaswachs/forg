@@ -80,9 +80,12 @@ if __name__ == '__main__':
     # Interpret the arguments passed to the script
     args = parser.parse_args()
     
-    print(args.locale)
-    locale.setlocale(locale.LC_ALL, args.locale)
-
+    if args.locale:
+        try:
+            locale.setlocale(locale.LC_ALL, args.locale)
+        except Exception as e:
+            print("Something went wrong with assigning the custom locale.")
+            print("Error message:\n", e)
     # Make sure the arguments are there, or else explain how the user needs to use the program
     if args.source and args.destination:
         
