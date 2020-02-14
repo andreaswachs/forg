@@ -1,6 +1,6 @@
 import argparse, sys, re, shutil, datetime, os, urllib, locale
 from pathlib import Path
-from time import sleep
+
 
 class Forg:
     def __init__(self, source_dir, dest_dir):      
