@@ -86,6 +86,14 @@ if __name__ == '__main__':
         except Exception as e:
             print("Something went wrong with assigning the custom locale.")
             print("Error message:\n", e)
+            print()
+            
+            print("Do you want to continue anyhow? Y/N")
+            answer = input()
+            if answer.lower() == 'n' and answer.lower() != 'y':
+                exit(3)
+            
+                
     # Make sure the arguments are there, or else explain how the user needs to use the program
     if args.source and args.destination:
         
