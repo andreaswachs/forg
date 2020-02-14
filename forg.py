@@ -20,7 +20,7 @@ class Forg:
     def organize(self):
         translated = {}
 
-        for file in tqdm(self.files, total=len(self.files), desc='Moving files:', unit='file'):
+        for file in tqdm(self.files, total=len(self.files), desc='Moving files', unit='file'):
             filename = str(file).split('/')[-1][0:8]
             file_date = {'year': filename[0:4],
                          'month': filename[4:6]}
