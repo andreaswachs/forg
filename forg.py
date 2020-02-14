@@ -29,7 +29,7 @@ class Forg:
             file_date['month'] = datetime.date(int(file_date['year']), int(file_date['month']), 1).strftime('%B')
 
             # Construct the full path with the date
-            dest_full_path = Path(self.dest_dir / file_date['year'] / file_date['month'])
+            dest_full_path = Path(self.dest_dir / file_date['year'] / file_date['month'].capitalize())
 
             # Check to see if it excists
             if not dest_full_path.exists():
