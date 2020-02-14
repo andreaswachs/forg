@@ -77,9 +77,15 @@ if __name__ == '__main__':
 
         # Handle the request of setting the default locale, if the user ran the program with this argument
         if sys.argv[1] == '--set-default-locale':
-            forgdata['default-locale'] = sys.argv[2]
+            
+            # Make sure that there is the expected amount of arguments passed to the program.
+            if len(sys.argv) == 3:
+                forgdata['default-locale'] = sys.argv[2]
+                print(f"Default locale set to {sys.argv[2]}. The program will now exit.")
+            else:
+                print("Illegal number of arguments passed. Expected flag and locale only.")
+
             forgdata.close()
-            print(f"Default locale set to {sys.argv[2]}. The program will now exit.")
             exit(0)
 
         # Handle asking for the default locale
