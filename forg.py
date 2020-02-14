@@ -1,4 +1,4 @@
-import argparse, sys, re, shutil, datetime, os, urllib, locale
+import argparse, sys, re, shutil, datetime, os, urllib, locale, shelve
 from pathlib import Path
 from tqdm import tqdm
 
@@ -68,21 +68,50 @@ class Forg:
 
 
 if __name__ == '__main__':
+
+    # This block is at the top because it needs to work beyond argparse
+    # Handle the request of setting the default locale, if the user ran the program with this argument
+    if len(sys.argv) == 3 and sys.argv[1] == '--set-default-locale':
+        forgdata = shelve.open('forgdata')
+        forgdata['default-locale'] = sys.argv[2]
+        forgdata.close()
+        print(f"Default locale set to {sys.argv[2]}. The program will now exit.")
+        exit(0)
+
     # Set up the parser. Require source and destination arguments
     parser = argparse.ArgumentParser(
         description='Put files in order by date, if the filename starts with a date '\
                     'of the format YYYYmmdd, like 20200101.'
     )
-    parser.add_argument('source', help='Source directory for files to organize')
-    parser.add_argument('destination', help='Destination directory for files to get organized in')
-    parser.add_argument('-locale', dest='locale', help='Sets the locale for month names if system is not english.\n'\
-                        'Remember that you need to pass the country code as well as the encoding, ex: da_DK.UTF-8')
+    parser.add_argument('source', nargs=1, default=None, help='Source directory for files to organize.')
+    parser.add_argument('destination', nargs=1, default=None, help='Destination directory for files to get organized in.')
+    parser.add_argument('--locale', dest='locale', help='Sets the locale for month names if system is not english.\n'\
+                        + 'Remember that you need to pass the country code as well as the encoding, ex: "da_DK.UTF-8".')
+    parser.add_argument('--set-default-locale', dest="setdefaultlocale", help='Set the defautl locale so that you '\
+                        + 'don\'t have to set the flag every time you use the program. If setting a default locale'\
+                        + 'do put the flag first followed by the locale code and nothing else.')
     # Interpret the arguments passed to the script
     args = parser.parse_args()
     
-    if args.locale:
+    
+    # Check to see if the forgdata shelve file exists, if so load the default locale
+    try:
+        forgdata = shelve.open('forgdata')
+        if 'default-locale' in forgdata.keys():
+            default_locale = forgdata['default-locale']
+    except Exception as e:
+        print(e)
+        exit(1)
+
+    if args.locale or default_locale:
         try:
-            locale.setlocale(locale.LC_ALL, args.locale)
+            # Set a buffer to either assigned locale, from the save file or the args
+            if args.locale:
+                locale_buffer = args.locale
+            elif default_locale:
+                locale_buffer = default_locale
+
+            locale.setlocale(locale.LC_ALL, locale_buffer)
         except Exception as e:
             print("Something went wrong with assigning the custom locale.")
             print("Error message:\n", e)
@@ -106,5 +135,6 @@ if __name__ == '__main__':
         # Organize!
         forg_obj.organize()
     else:
-        print(args.usage)
+        print(dir(parser))
+        print(parser.usage)
         exit(1)
