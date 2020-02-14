@@ -70,13 +70,27 @@ class Forg:
 if __name__ == '__main__':
 
     # This block is at the top because it needs to work beyond argparse
-    # Handle the request of setting the default locale, if the user ran the program with this argument
-    if len(sys.argv) == 3 and sys.argv[1] == '--set-default-locale':
+    # Handle single flag assignments, such as setting default settings
+    if len(sys.argv) >= 2:
+        # Open up the saved variables file
         forgdata = shelve.open('forgdata')
-        forgdata['default-locale'] = sys.argv[2]
-        forgdata.close()
-        print(f"Default locale set to {sys.argv[2]}. The program will now exit.")
-        exit(0)
+
+        # Handle the request of setting the default locale, if the user ran the program with this argument
+        if sys.argv[1] == '--set-default-locale':
+            forgdata['default-locale'] = sys.argv[2]
+            forgdata.close()
+            print(f"Default locale set to {sys.argv[2]}. The program will now exit.")
+            exit(0)
+
+        # Handle asking for the default locale
+        elif sys.argv[1] == '--get-default-locale':
+            try:
+                print(f"The default locale for this program is: {forgdata['default-locale']}.")
+            except:
+                print("There was no default locale set. You can set it with the flag --set-default-locale <locale-code>")
+                
+            forgdata.close()
+            exit(0)
 
     # Set up the parser. Require source and destination arguments
     parser = argparse.ArgumentParser(
@@ -89,7 +103,9 @@ if __name__ == '__main__':
                         + 'Remember that you need to pass the country code as well as the encoding, ex: "da_DK.UTF-8".')
     parser.add_argument('--set-default-locale', dest="setdefaultlocale", help='Set the defautl locale so that you '\
                         + 'don\'t have to set the flag every time you use the program. If setting a default locale'\
-                        + 'do put the flag first followed by the locale code and nothing else.')
+                        + 'do put the flag first followed by the locale code and nothing else.')    
+    parser.add_argument('--get-default-locale', dest='getdefaultlocale', help='Tells the user what the default locale is set to.')
+
     # Interpret the arguments passed to the script
     args = parser.parse_args()
     
