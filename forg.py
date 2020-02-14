@@ -1,9 +1,50 @@
 import argparse
+import sys
+from pathlib import Path
 
 class Forg:
+    def __init__(self, source_dir, dest_dir):      
+        self.source_dir = Path(source_dir)
+        self.dest_dir = Path(dest_dir)
 
-    def __init__(self):
+        # Check to see if the directories exist
+        if self.__source_directory_exists():
+
+            # Firstly check to see if there is elgible files to move from source to destination folder
+            if self.__inspect_source_directory():
+
+                # Make sure the destination folder exists
+                # self.__prepare_destination_dir()
+                print("We're ready to move files!")
+
+    def organize(self):
         pass
+
+
+    def __inspect_source_directory(self):
+        # List all files that have a date as the first thing in their filename
+        files = self.source_dir.glob('^\d{8}.+')
+
+        if not files:
+            print("There were no elgible files to move in the source directory.", file=sys.stderr)
+            exit(2)
+        else:
+            return True
+
+
+    def __source_directory_exists(self):
+        if not self.source_dir.exists():
+            print("The source directory does not exist - exiting program.", file=sys.stderr)
+            exit(1)
+        else:
+            return True
+
+
+    def __prepare_destination_dir(self):
+        if not self.dest_dir.exists():
+                self.dest_dir.mkdir()
+
+
 
 if __name__ == '__main__':
     # Set up the parser. Require source and destination arguments
@@ -19,7 +60,18 @@ if __name__ == '__main__':
     
     # Make sure the arguments are there, or else explain how the user needs to use the program
     if args.source and args.destination:
-        print("it works!")
+        
+        # Create the organizer object
+        forg_obj = Forg(
+            source_dir=arg.source,
+            dest_dir=args.destination
+        )
+
+        forg_obj.organize()
+
+
+
+
     else:
         print(args.usage)
         exit(1)
