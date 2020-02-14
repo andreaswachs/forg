@@ -1,6 +1,6 @@
-import argparse
-import sys
+import argparse, sys, re, shutil, datetime, os, urllib, locale
 from pathlib import Path
+from time import sleep
 
 class Forg:
     def __init__(self, source_dir, dest_dir):      
@@ -14,21 +14,43 @@ class Forg:
             if self.__inspect_source_directory():
 
                 # Make sure the destination folder exists
-                # self.__prepare_destination_dir()
-                print("We're ready to move files!")
+                self.__prepare_destination_dir()
+
 
     def organize(self):
-        pass
+        translated = {}
+
+        for file in self.files:
+            filename = str(file).split('/')[-1][0:8]
+            file_date = {'year': filename[0:4],
+                         'month': filename[4:6]}
+            
+            # Change the month number to the month name
+            file_date['month'] = datetime.date(int(file_date['year']), int(file_date['month']), 1).strftime('%B')
+
+            # Construct the full path with the date
+            dest_full_path = Path(self.dest_dir / file_date['year'] / file_date['month'])
+
+            # Check to see if it excists
+            if not dest_full_path.exists():
+                os.makedirs(dest_full_path)
+
+            shutil.move(str(file), str(dest_full_path))
 
 
     def __inspect_source_directory(self):
+        # Create a regex pattern to match the elgible files. 
+        # We are going to match the whole path to the single files, so it takes that in account too
+        pattern = re.compile('.+\d{8}.+')
+        
         # List all files that have a date as the first thing in their filename
-        files = self.source_dir.glob('^\d{8}.+')
+        files = [file for file in self.source_dir.glob('*') if pattern.match(str(file))]
 
         if not files:
             print("There were no elgible files to move in the source directory.", file=sys.stderr)
             exit(2)
         else:
+            self.files = files
             return True
 
 
@@ -42,8 +64,7 @@ class Forg:
 
     def __prepare_destination_dir(self):
         if not self.dest_dir.exists():
-                self.dest_dir.mkdir()
-
+                os.makedirs(self.dest_dir)
 
 
 if __name__ == '__main__':
@@ -54,24 +75,25 @@ if __name__ == '__main__':
     )
     parser.add_argument('source', help='Source directory for files to organize')
     parser.add_argument('destination', help='Destination directory for files to get organized in')
-    
+    parser.add_argument('-locale', dest='locale', help='Sets the locale for month names if system is not english.\n'\
+                        'Remember that you need to pass the country code as well as the encoding, ex: da_DK.UTF-8')
     # Interpret the arguments passed to the script
     args = parser.parse_args()
     
+    print(args.locale)
+    locale.setlocale(locale.LC_ALL, args.locale)
+
     # Make sure the arguments are there, or else explain how the user needs to use the program
     if args.source and args.destination:
         
         # Create the organizer object
         forg_obj = Forg(
-            source_dir=arg.source,
+            source_dir=args.source,
             dest_dir=args.destination
         )
 
+        # Organize!
         forg_obj.organize()
-
-
-
-
     else:
         print(args.usage)
         exit(1)
